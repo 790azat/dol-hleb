@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SetupController;
+use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Middleware\AdminOnly;
 use App\Livewire;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,7 @@ Route::livewire('/admin', Livewire\Admin\Dashboard::class)->name('admin')
     ->middleware(AdminOnly::class);
 
 Route::get('/setup/{token}', SetupController::class)->name('setup');
+Route::post('/telegram/webhook/{secret}', TelegramWebhookController::class)->name('telegram.webhook');
 
 // Старые адреса dol-hleb.ru → новые страницы
 Route::permanentRedirect('/magazin', '/catalog');

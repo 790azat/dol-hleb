@@ -42,8 +42,12 @@
             <a href="{{ route('contacts') }}" wire:navigate class="rounded-full px-4 py-2 hover:bg-sand">Контакты</a>
         </nav>
 
-        <div class="ml-auto flex items-center gap-2">
-            <a href="tel:{{ preg_replace('/[^\d+]/', '', $mainPhone['number']) }}" class="hidden whitespace-nowrap text-right xl:block">
+        <div class="ml-auto hidden w-full max-w-xs md:block lg:hidden xl:block">
+            <livewire:header-search />
+        </div>
+
+        <div class="ml-auto flex items-center gap-2 md:ml-0">
+            <a href="tel:{{ preg_replace('/[^\d+]/', '', $mainPhone['number']) }}" class="hidden whitespace-nowrap text-right 2xl:block">
                 <span class="block text-sm font-bold">{{ $mainPhone['number'] }}</span>
                 <span class="block text-xs text-mocha">{{ $mainPhone['label'] }}</span>
             </a>
@@ -57,6 +61,7 @@
 
     <div x-show="open" x-cloak x-transition class="max-h-[80vh] overflow-y-auto border-t border-cocoa/5 bg-cream lg:hidden">
         <div class="container-x space-y-1 py-4 text-base font-semibold">
+            <div class="pb-2 md:hidden"><livewire:header-search /></div>
             <a href="{{ route('catalog') }}" wire:navigate class="block rounded-2xl px-4 py-3 hover:bg-sand">Весь каталог</a>
             @foreach ($menu as $item)
                 <a href="{{ route('catalog', $item->slug) }}" wire:navigate class="block rounded-2xl px-4 py-2.5 text-sm hover:bg-sand">{{ $item->name }}</a>

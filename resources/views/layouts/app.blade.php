@@ -23,6 +23,11 @@
     <x-footer />
 
     <x-cart-toast />
+    @unless (request()->routeIs('admin*'))
+        @persist('chat')
+            <livewire:chat-widget />
+        @endpersist
+    @endunless
     @livewireScripts
 </body>
 </html>

@@ -5,7 +5,7 @@
     </div>
 
     <div class="mt-6 flex flex-wrap gap-2">
-        @foreach (['orders' => 'Заказы'.($newOrders ? " ({$newOrders})" : ''), 'products' => 'Товары', 'reviews' => 'Отзывы'.($pendingReviews ? " ({$pendingReviews})" : '')] as $key => $label)
+        @foreach (['orders' => 'Заказы'.($newOrders ? " ({$newOrders})" : ''), 'chats' => 'Чаты'.($unreadChats ? " ({$unreadChats})" : ''), 'products' => 'Товары', 'reviews' => 'Отзывы'.($pendingReviews ? " ({$pendingReviews})" : ''), 'settings' => 'Настройки'] as $key => $label)
             <button wire:click="$set('tab', '{{ $key }}')" class="chip {{ $tab === $key ? 'border-cocoa bg-cocoa text-cream' : 'border-cocoa/15 bg-white' }}">{{ $label }}</button>
         @endforeach
     </div>
@@ -64,6 +64,64 @@
             </table>
         </div>
         <div class="mt-4">{{ $products->links() }}</div>
+    @elseif ($tab === 'chats')
+        <div class="mt-6 grid gap-4 lg:grid-cols-[320px_1fr]" wire:poll.5s>
+            <div class="space-y-2">
+                @forelse ($chats as $c)
+                    <button wire:key="c-{{ $c->id }}" wire:click="openChat({{ $c->id }})" class="block w-full rounded-2xl p-4 text-left ring-1 transition {{ $chatId === $c->id ? 'bg-cocoa text-cream ring-cocoa' : 'bg-white ring-cocoa/5 hover:ring-crust' }}">
+                        <span class="flex items-center justify-between gap-2"><b>{{ $c->label() }}</b>@if ($c->unread)<span class="size-2.5 rounded-full bg-berry"></span>@endif</span>
+                        <span class="text-xs opacity-60">{{ $c->last_message_at?->format('d.m H:i') }}</span>
+                    </button>
+                @empty
+                    <p class="text-mocha">Сообщений пока нет.</p>
+                @endforelse
+                {{ $chats->links() }}
+            </div>
+            <div class="flex min-h-[420px] flex-col rounded-3xl bg-white ring-1 ring-cocoa/5">
+                @if ($current)
+                    <div class="border-b border-cocoa/5 p-4"><b>{{ $current->label() }}</b> @if ($current->page)<span class="text-xs text-mocha">· {{ $current->page }}</span>@endif</div>
+                    <div class="flex-1 space-y-2 overflow-y-auto bg-cream p-4">
+                        @foreach ($current->messages as $m)
+                            <div class="flex {{ $m->sender === 'admin' ? 'justify-end' : '' }}">
+                                <div class="max-w-[80%] whitespace-pre-line rounded-2xl px-4 py-2 text-sm {{ $m->sender === 'admin' ? 'bg-cocoa text-cream' : 'bg-white' }}">{{ $m->body }}<span class="block text-[10px] opacity-50">{{ $m->created_at->format('d.m H:i') }}</span></div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <form wire:submit="sendReply" class="flex gap-2 border-t border-cocoa/5 p-3">
+                        <input wire:model="reply" class="input" placeholder="Ответ посетителю…">
+                        <button class="btn-primary">Отправить</button>
+                    </form>
+                @else
+                    <p class="m-auto text-mocha">Выберите чат слева. Отвечать можно и прямо из Telegram.</p>
+                @endif
+            </div>
+        </div>
+    @elseif ($tab === 'settings')
+        <form wire:submit="saveSettings" class="mt-6 max-w-2xl space-y-5 rounded-3xl bg-white p-6 ring-1 ring-cocoa/5">
+            <h2 class="text-2xl font-bold">Telegram: живой чат и заказы</h2>
+            <ol class="list-decimal space-y-1 pl-5 text-sm text-mocha">
+                <li>Создайте бота у <a href="https://t.me/BotFather" target="_blank" class="text-berry">@BotFather</a> командой /newbot и вставьте токен ниже.</li>
+                <li>Нажмите «Сохранить» — сайт подключит вебхук.</li>
+                <li>Напишите своему боту: <code class="rounded bg-sand px-1.5 py-0.5">/start {{ $linkCode }}</code> — чат привяжется автоматически.</li>
+                <li>Сообщения из чата и новые заказы будут приходить в Telegram. Ответьте (Reply) на сообщение — посетитель увидит ответ на сайте.</li>
+            </ol>
+            <div>
+                <label class="label">Токен бота</label>
+                <input wire:model="botToken" class="input font-mono" placeholder="123456789:AA…">
+                @error('botToken') <p class="mt-1 text-sm text-berry">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label class="label">ID чата администратора</label>
+                <input wire:model="adminChat" class="input font-mono" placeholder="заполнится после /start {{ $linkCode }}">
+                @error('adminChat') <p class="mt-1 text-sm text-berry">{{ $message }}</p> @enderror
+            </div>
+            @if ($notice) <p class="rounded-2xl bg-crust/15 p-3 text-sm">{{ $notice }}</p> @endif
+            <div class="flex flex-wrap items-center gap-3">
+                <button class="btn-dark">Сохранить</button>
+                <button type="button" wire:click="testTelegram" class="btn-ghost">Отправить тест</button>
+                <span class="text-sm {{ $telegramReady ? 'text-green-700' : 'text-mocha' }}">{{ $telegramReady ? '● Подключено' : '○ Не подключено' }}</span>
+            </div>
+        </form>
     @else
         <div class="mt-6 space-y-3">
             @forelse ($reviews as $r)
