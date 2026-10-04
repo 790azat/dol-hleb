@@ -33,12 +33,18 @@ class Product extends Model
     {
         $path = $this->images[$index] ?? null;
 
-        return $path ? asset('images/'.$path) : null;
+        return $path ? self::url($path) : null;
     }
 
     public function imageUrls(): array
     {
-        return array_map(fn ($p) => asset('images/'.$p), $this->images ?? []);
+        return array_map(fn ($p) => self::url($p), $this->images ?? []);
+    }
+
+    /** Фото из репозитория (public/images) или внешняя ссылка, добавленная в админке. */
+    public static function url(string $path): string
+    {
+        return preg_match('~^https?://~', $path) ? $path : asset('images/'.$path);
     }
 
     public function formattedPrice(): string
