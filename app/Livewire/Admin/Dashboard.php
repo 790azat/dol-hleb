@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Category;
 use App\Models\Chat;
+use App\Models\Media;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
@@ -12,11 +13,12 @@ use App\Support\Telegram;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class Dashboard extends Component
 {
-    use WithPagination;
+    use WithFileUploads, WithPagination;
 
     #[Url]
     public string $tab = 'overview';
@@ -33,6 +35,9 @@ class Dashboard extends Component
     public array $form = [];
 
     public string $newCategory = '';
+
+    /** Фото, выбранные в редакторе товара (загружаются сразу). */
+    public array $photos = [];
 
     public ?int $chatId = null;
 
@@ -135,6 +140,24 @@ class Dashboard extends Component
             'is_new' => (bool) $p->is_new,
         ];
         $this->resetValidation();
+    }
+
+    public function updatedPhotos(): void
+    {
+        $this->validate(['photos.*' => 'image|max:10240'], [], ['photos.*' => 'фото']);
+        $paths = array_filter(array_map('trim', preg_split('/\R/', (string) ($this->form['images'] ?? ''))));
+        foreach ($this->photos as $file) {
+            $paths[] = Media::storeUpload($file)->path();
+        }
+        $this->form['images'] = implode("\n", $paths);
+        $this->photos = [];
+    }
+
+    public function removePhoto(int $index): void
+    {
+        $paths = array_values(array_filter(array_map('trim', preg_split('/\R/', (string) ($this->form['images'] ?? '')))));
+        unset($paths[$index]);
+        $this->form['images'] = implode("\n", $paths);
     }
 
     public function closeProduct(): void

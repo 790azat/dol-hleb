@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Middleware\AdminOnly;
@@ -17,6 +18,7 @@ Route::livewire('/admin/login', Livewire\Admin\Login::class)->name('admin.login'
 Route::livewire('/admin', Livewire\Admin\Dashboard::class)->name('admin')
     ->middleware(AdminOnly::class);
 
+Route::get('/media/{media}.webp', MediaController::class)->whereNumber('media')->name('media');
 Route::get('/setup/{token}', SetupController::class)->name('setup');
 Route::post('/telegram/webhook/{secret}', TelegramWebhookController::class)->name('telegram.webhook');
 

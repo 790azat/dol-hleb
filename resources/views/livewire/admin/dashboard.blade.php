@@ -137,13 +137,25 @@
                         <div><label class="label">Краткое описание</label><input wire:model="form.anons" class="input"></div>
                         <div><label class="label">Описание</label><textarea wire:model="form.description" rows="4" class="input"></textarea></div>
                         <div>
-                            <label class="label">Фото: по одному на строку (ссылка на картинку или путь из каталога)</label>
-                            <textarea wire:model.live.debounce.500ms="form.images" rows="3" class="input font-mono text-xs" placeholder="https://…/tort.jpg"></textarea>
-                            <div class="mt-2 flex flex-wrap gap-2">
-                                @foreach (array_filter(array_map('trim', preg_split('/\R/', $form['images'] ?? ''))) as $img)
-                                    <img src="{{ \App\Models\Product::url($img) }}" class="size-16 rounded-xl object-cover ring-1 ring-cocoa/10" alt="">
+                            <label class="label">Фото</label>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach (array_values(array_filter(array_map('trim', preg_split('/\R/', $form['images'] ?? '')))) as $i => $img)
+                                    <div class="relative" wire:key="ph-{{ $i }}-{{ md5($img) }}">
+                                        <img src="{{ \App\Models\Product::url($img) }}" class="size-20 rounded-xl object-cover ring-1 ring-cocoa/10" alt="">
+                                        <button type="button" wire:click="removePhoto({{ $i }})" class="absolute -right-1.5 -top-1.5 grid size-6 place-items-center rounded-full bg-cocoa text-xs text-cream" aria-label="Убрать фото">✕</button>
+                                    </div>
                                 @endforeach
+                                <label class="grid size-20 cursor-pointer place-items-center rounded-xl border-2 border-dashed border-cocoa/20 bg-white text-center text-xs text-mocha hover:border-crust">
+                                    <span wire:loading.remove wire:target="photos">+ Фото</span>
+                                    <span wire:loading wire:target="photos">Загрузка…</span>
+                                    <input type="file" wire:model="photos" accept="image/*" multiple class="sr-only">
+                                </label>
                             </div>
+                            @error('photos.*') <p class="mt-1 text-sm text-berry">{{ $message }}</p> @enderror
+                            <details class="mt-2 text-xs text-mocha">
+                                <summary class="cursor-pointer">Добавить по ссылке</summary>
+                                <textarea wire:model.live.debounce.500ms="form.images" rows="3" class="input mt-2 font-mono text-xs" placeholder="https://…/tort.jpg (по одной на строку)"></textarea>
+                            </details>
                         </div>
                         <div>
                             <label class="label">Разделы</label>

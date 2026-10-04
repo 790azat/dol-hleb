@@ -44,7 +44,11 @@ class Product extends Model
     /** Фото из репозитория (public/images) или внешняя ссылка, добавленная в админке. */
     public static function url(string $path): string
     {
-        return preg_match('~^https?://~', $path) ? $path : asset('images/'.$path);
+        return match (true) {
+            (bool) preg_match('~^https?://~', $path) => $path,
+            str_starts_with($path, '/') => url($path),
+            default => asset('images/'.$path),
+        };
     }
 
     public function formattedPrice(): string
