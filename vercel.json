@@ -1,0 +1,41 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "framework": null,
+    "buildCommand": "echo 'assets are prebuilt in public/build'",
+    "installCommand": "echo 'composer runs inside vercel-php'",
+    "outputDirectory": "public",
+    "regions": ["fra1"],
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.9.0",
+            "maxDuration": 60,
+            "excludeFiles": "{public/images/**,node_modules/**,tests/**,scripts/**,storage/logs/**,database/database.sqlite}"
+        }
+    },
+    "routes": [
+        { "src": "/index.php", "dest": "/api/index.php" },
+        {
+            "src": "/(build|images)/(.*)",
+            "headers": { "Cache-Control": "public, max-age=31536000, immutable" },
+            "continue": true
+        },
+        { "handle": "filesystem" },
+        { "src": "/(.*)", "dest": "/api/index.php" }
+    ],
+    "env": {
+        "APP_ENV": "production",
+        "APP_DEBUG": "false",
+        "APP_LOCALE": "ru",
+        "APP_CONFIG_CACHE": "/tmp/config.php",
+        "APP_EVENTS_CACHE": "/tmp/events.php",
+        "APP_PACKAGES_CACHE": "/tmp/packages.php",
+        "APP_ROUTES_CACHE": "/tmp/routes.php",
+        "APP_SERVICES_CACHE": "/tmp/services.php",
+        "VIEW_COMPILED_PATH": "/tmp",
+        "CACHE_STORE": "array",
+        "SESSION_DRIVER": "cookie",
+        "QUEUE_CONNECTION": "sync",
+        "LOG_CHANNEL": "stderr",
+        "DB_SSLMODE": "require"
+    }
+}

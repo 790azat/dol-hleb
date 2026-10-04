@@ -1,0 +1,41 @@
+name: Импорт со старого сайта
+
+# Скачивает каталог, тексты и фотографии с https://dol-hleb.ru
+# в database/data/catalog.json и public/images/ и коммитит их в репозиторий.
+on:
+  workflow_dispatch:
+    inputs:
+      limit_folders:
+        description: 'Сколько разделов скачать (0 = все)'
+        default: '0'
+  push:
+    branches: [main]
+    paths: ['scripts/scrape.py', '.github/workflows/scrape.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scrape
+  cancel-in-progress: true
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install beautifulsoup4 lxml pillow
+      - run: python3 -u scripts/scrape.py --workers 12 --limit-folders "${{ github.event.inputs.limit_folders || '0' }}"
+      - name: Коммит результата
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add database/data/catalog.json public/images
+          git diff --cached --quiet && echo "Нет изменений" && exit 0
+          git commit -m "Импорт каталога и фото со старого сайта"
+          git pull --rebase origin main
+          git push origin HEAD:main

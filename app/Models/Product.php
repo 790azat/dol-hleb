@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
+class Product extends Model
+{
+    protected $guarded = [];
+
+    protected $casts = [
+        'params' => 'array',
+        'images' => 'array',
+        'price' => 'float',
+        'is_new' => 'boolean',
+        'is_featured' => 'boolean',
+        'is_visible' => 'boolean',
+    ];
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class);
+    }
+
+    public function scopeVisible(Builder $query): void
+    {
+        $query->where('is_visible', true);
+    }
+
+    public function imageUrl(int $index = 0): ?string
+    {
+        $path = $this->images[$index] ?? null;
+
+        return $path ? asset('images/'.$path) : null;
+    }
+
+    public function imageUrls(): array
+    {
+        return array_map(fn ($p) => asset('images/'.$p), $this->images ?? []);
+    }
+
+    public function formattedPrice(): string
+    {
+        return $this->price ? number_format($this->price, 0, ',', ' ').' ₽' : 'Цена по запросу';
+    }
+}

@@ -1,9 +1,45 @@
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@source '../../vendor/livewire/livewire/src/Features/SupportPagination/views/*.blade.php';
+@source '../views';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Playfair Display', ui-serif, Georgia, serif;
+
+    --color-cream: #fbf6ef;
+    --color-sand: #f3e8da;
+    --color-wheat: #e8d3b5;
+    --color-crust: #c7843f;
+    --color-berry: #b8432f;
+    --color-berry-dark: #973322;
+    --color-cocoa: #2b1d14;
+    --color-mocha: #6b5444;
+}
+
+@layer base {
+    html { scroll-behavior: smooth; }
+    h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.01em; }
+    [x-cloak] { display: none !important; }
+}
+
+@utility container-x { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+@utility btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition active:scale-[.98] disabled:opacity-50; }
+@utility btn-primary { @apply btn bg-berry text-white shadow-lg shadow-berry/20 hover:bg-berry-dark; }
+@utility btn-dark { @apply btn bg-cocoa text-cream hover:bg-black; }
+@utility btn-ghost { @apply btn border border-cocoa/15 bg-white/60 text-cocoa hover:border-cocoa/40 hover:bg-white; }
+@utility input { @apply w-full rounded-2xl border border-cocoa/15 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-mocha/50 focus:border-crust focus:ring-4 focus:ring-crust/15; }
+@utility label { @apply mb-1.5 block text-sm font-semibold text-cocoa; }
+@utility chip { @apply inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium transition whitespace-nowrap; }
+@utility eyebrow { @apply text-xs font-bold uppercase tracking-[.2em] text-crust; }
+@utility prose-shop {
+    @apply text-mocha leading-relaxed;
+    & p { @apply my-3; }
+    & ul { @apply my-3 list-disc pl-5; }
+    & ol { @apply my-3 list-decimal pl-5; }
+    & h2, & h3 { @apply mt-6 mb-2 text-xl text-cocoa; }
+    & strong, & b { @apply text-cocoa; }
+    & table { @apply my-4 w-full text-sm; }
+    & td, & th { @apply border-b border-cocoa/10 py-2 pr-4 align-top; }
 }
