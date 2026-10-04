@@ -60,7 +60,7 @@ class CatalogSeeder extends Seeder
 
             // Хиты на главную: первые товары с фото из праздничных тортов и выпечки
             Product::query()->update(['is_featured' => false]);
-            Product::whereNotNull('images')->where('images', '!=', '[]')->whereNotNull('price')
+            Product::whereNotNull('images')->whereRaw("CAST(images AS TEXT) <> '[]'")->whereNotNull('price')
                 ->orderBy('position')->limit(8)->update(['is_featured' => true]);
 
             foreach ($data['pages'] as $pg) {

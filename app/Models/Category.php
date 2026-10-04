@@ -45,7 +45,7 @@ class Category extends Model
         if ($this->image) {
             return asset($this->image);
         }
-        $product = $this->products()->whereNotNull('images')->where('images', '!=', '[]')->first();
+        $product = $this->products()->whereNotNull('images')->whereRaw("CAST(images AS TEXT) <> '[]'")->first();
 
         return $product?->imageUrl();
     }
