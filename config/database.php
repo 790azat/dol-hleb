@@ -3,6 +3,16 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+// Neon: старый libpq на Vercel не умеет SNI, поэтому передаём ID эндпоинта
+// в пароле (endpoint=<id>;<пароль>), см. https://neon.tech/sni
+$pgUrl = env('DB_URL', env('DATABASE_URL'));
+$pg = $pgUrl ? parse_url($pgUrl) : [];
+$pgPassword = isset($pg['pass']) ? rawurldecode($pg['pass']) : env('DB_PASSWORD', '');
+if (isset($pg['host']) && str_ends_with($pg['host'], '.neon.tech')) {
+    $endpoint = preg_replace('/-pooler$/', '', explode('.', $pg['host'])[0]);
+    $pgPassword = "endpoint={$endpoint};{$pgPassword}";
+}
+
 return [
 
     /*
@@ -86,12 +96,12 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL', env('DATABASE_URL')),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'url' => null,
+            'host' => $pg['host'] ?? env('DB_HOST', '127.0.0.1'),
+            'port' => $pg['port'] ?? env('DB_PORT', '5432'),
+            'database' => isset($pg['path']) ? ltrim($pg['path'], '/') : env('DB_DATABASE', 'laravel'),
+            'username' => isset($pg['user']) ? rawurldecode($pg['user']) : env('DB_USERNAME', 'root'),
+            'password' => $pgPassword,
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
