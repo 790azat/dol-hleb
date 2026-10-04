@@ -13,7 +13,7 @@
         }
     },
     "routes": [
-        { "src": "/index.php", "dest": "/api/index.php" },
+        { "src": "/(index\\.php)?", "dest": "/api/index.php" },
         {
             "src": "/(build|images)/(.*)",
             "headers": { "Cache-Control": "public, max-age=31536000, immutable" },
