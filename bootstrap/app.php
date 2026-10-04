@@ -21,4 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+        // Короткая строка об ошибке в логах Vercel (полный стек там обрезается)
+        $exceptions->report(function (Throwable $e) {
+            error_log('APP_ERROR '.$e::class.': '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine());
+        });
     })->create();
