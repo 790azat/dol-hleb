@@ -37,6 +37,11 @@ PAGES = {
     "kontakty": "Контакты",
 }
 
+def is_complete(data):
+    # После </body> движок дописывает счётчики, так что </html> может быть далеко от конца
+    return b"</body>" in data or b"</html>" in data
+
+
 def fetch(url, binary=False, timeout=75):
     """Старый сайт по HTTP/1.1 «зависает» посреди страницы, а по HTTP/2 отдаёт
     её целиком, но не закрывает поток. Поэтому качаем curl'ом (HTTP/2, gzip)
@@ -54,8 +59,7 @@ def fetch(url, binary=False, timeout=75):
                 time.sleep(0.4)
                 if not binary and os.path.getsize(tmp) > 1000:
                     with open(tmp, "rb") as fh:
-                        fh.seek(max(0, os.path.getsize(tmp) - 4000))
-                        if b"</html>" in fh.read():
+                        if is_complete(fh.read()):
                             break
             if proc.poll() is None:
                 proc.kill()
@@ -68,7 +72,7 @@ def fetch(url, binary=False, timeout=75):
             # 28 = таймаут curl: файл мог прийти целиком, битые картинки отсеет Pillow
             if proc.returncode in (0, 28) and data:
                 return data
-        elif b"</html>" in data[-4000:]:
+        elif is_complete(data):
             return data.decode("utf-8", errors="ignore")
         print(f"  ! {url}: attempt {attempt + 1} failed ({len(data)} bytes)", file=sys.stderr)
         time.sleep(2 + attempt * 3)
